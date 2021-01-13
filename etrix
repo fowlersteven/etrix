@@ -121,14 +121,45 @@ def normalize():
 
     # print the calc nicely
     for i in range(len(calc)):
-        print("Mark 1 for conduit",i+1,"= %.2f",% calc[i][0])
-        print("Mark 2 for conduit",i+1,"= %.2f",% calc[i][1])
-        print("Total offset distance of conduit",i+1,"= ", calc[i][2])
-        print("Distance between marks of conduit",i+1,"= ", calc[i][3])
+        print("Mark 1 for conduit",i+1,"= " + prett_print_inches(calc[i][0]))
+        print("Mark 2 for conduit",i+1,"= " + prett_print_inches(calc[i][1]))
+        print("Total offset distance of conduit",i+1,"= " + prett_print_inches(calc[i][2]))
+        print("Distance between marks of conduit",i+1,"= " + prett_print_inches(calc[i][3]))
 
 def print_conduit_names(emt_list):
     pass
 
+def prett_print_inches(inches):
+
+    s = str(inches).split('.')
+    dec = ''
+    
+    try:
+        dec = s[1]
+    except:
+        return 'NaN'
+
+    cor = float('0.' + dec)
+    
+    if cor < 0.0625:
+        return s[0]
+
+    frac = ''
+    
+    frac = '⅞' if cor < 0.9375 else ''
+    frac = '¾' if cor < 0.8125 else frac
+    frac = '⅝' if cor < 0.6875 else frac
+    frac = '½' if cor < 0.5625 else frac
+    frac = '⅜' if cor < 0.4375 else frac
+    frac = '¼' if cor < 0.3125 else frac
+    frac = '⅛' if cor < 0.1875 else frac
+    
+    if frac == '':
+        return str(int(s[0]) + 1)
+
+    return s[0] + frac
+    
+    
 def main():
     normalize()
     
