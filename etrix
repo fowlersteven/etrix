@@ -81,7 +81,7 @@ def main():
 						help="<Required> list of the distances from the first conduit, starting with 0, in inches", type=float)
 
 	parser.add_argument("-o", "--offset", required=True,
-						help="<Required> distance of the first offset in inches", type=float)
+						help="<Required> size of the first offset in inches", type=float)
 
 	parser.add_argument("-a", "--angle", default=45.0,
 						help="angle of the bend in degrees (default = 45)", type=float)
