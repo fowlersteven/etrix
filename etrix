@@ -1,133 +1,8 @@
 #!/usr/bin/env python3
-
-# from sys import argv
-from dataclasses import dataclass
-# import curses
 from math import sin, radians, tan
+from sys import argv
+import argparse
 
-
-@dataclass
-class Emt:
-    outerd: float
-    innerd: float
-    min_dist: float
-    tradesize: str
-    imperial: str
-
-
-@dataclass
-class EMT_CONSTANTS:
-    shrink10: float = .063
-    shrink22: float = .188
-    shrink30: float = .250
-    shrink45: float = .375
-    shrink60: float = .5
-
-    multi10: float = 6.0
-    multi22: float = 2.6
-    multi30: float = 2.0
-    multi45: float = 1.4
-    multi60: float = 1.2
-
-
-def init_emt():
-    emt_list = []
-    emt_list.append(Emt(.5,     .706,   5.0,    "16",   "½\""))
-    emt_list.append(Emt(.75,    .922,   6.0,    "21",   "¾\""))
-    emt_list.append(Emt(1.0,    1.163,  7.0,    "27",   "1\""))
-    emt_list.append(Emt(1.25,   1.51,   8.5,    "35",   "1¼\""))
-    emt_list.append(Emt(1.5,    1.74,   10,     "41",   "1½\""))
-    emt_list.append(Emt(2.0,    2.197,  13.5,   "53",   "2\""))
-    emt_list.append(Emt(2.5,    2.875,  15.0,   "63",   "2½\""))
-    emt_list.append(Emt(3.0,    3.5,    18.0,   "78",   "3\""))
-    emt_list.append(Emt(3.5,    4.0,    21.0,   "91",   "3½\""))
-    emt_list.append(Emt(4.0,    4.5,    24.0,   "103",  "4\""))
-    return emt_list
-
-
-def normalize_do(distances, first_os, angle, target, diverge):
-    
-    # get the offset sizes
-    os_sizes = []
-    for i in range(len(distances)):
-        os_sizes.append( first_os + (i * target) - (distances[i] - distances[0]) )
-
-    # print("os_sizes:", os_sizes)
-
-    # get multiplier
-    multiplier = 1 / sin(radians(angle))
-    if angle in [10.0,60.0]:
-        pass
-
-    # generate distance between marks
-    marks_distances = []
-    for i in os_sizes:
-        marks_distances.append(i * multiplier)
-
-    # generate first marks (diff from diverge?)
-    first_marks = []
-    adjacent = 1/tan(radians(angle))
-
-
-    if not diverge:
-        for i in range(len(distances)):
-         first_marks.append(6 + (adjacent * distances[i]) - (i * 0.75)) # 0.75 HARD CODED NEED TO CHANGE LATER
-    else: 
-        pass
-
-    marks_list = []
-    # generate marks_list
-    for i in range(len(distances)):
-        marks_list.append([first_marks[i],marks_distances[i] + first_marks[i],os_sizes[i],marks_distances[i]])
-    
-    return marks_list
-
-def normalize():
-    
-    # TODO: Error checking
-    
-    units = int(input("Enter the number of conduits to bend: "))
-    print("\n" + str(units) + " selected!\n")
-
-    asymptote = input("Does the series converge or diverge (default=diverge): ")
-    diverge = True
-    if asymptote.lower() in ['c', 'converge', 'con', 'conv']:
-        diverge = False
-
-
-    if diverge:
-        print("\nDiverge selected!\n")
-    else: 
-        print("\nConverge selected!\n")
-
-
-    # conduit_type = input("What kind of conduit are you using (default=EMT): ")
-    # TODO: logic for other conduits goes here
-
-    init_distances = [0]
-    for i in range(1, units):
-        init_distances.append(float(input("Distance of conduit number " + str(i+1) + " from your first conduit: ")))
-        # TODO: get inputs for conduit sizes and use them to determine future subtraction values \ Defaulting to ¾ for now
-
-    # TODO: make this pretty
-    print(init_distances)
-
-    first_os = float(input("Enter the distance of your first offset: "))
-    angle = float(input("Enter the angle of your bend: "))
-    target_dist = float(input("Enter the distance between your normalized conduits(¢ to ¢): "))
-
-    # calc will be in format [first mark, second mark, o/s dist, dist b/w marks]
-    calc = normalize_do(init_distances, first_os, angle, target_dist, diverge)
-
-    # print the calc nicely
-    for i in range(len(calc)):
-        print("Mark 1 for conduit",i+1,"= " + prett_print_inches(calc[i][0]))
-        print("Mark 2 for conduit",i+1,"= " + prett_print_inches(calc[i][1]))
-        print("Total offset distance of conduit",i+1,"= " + prett_print_inches(calc[i][2]))
-        print("Distance between marks of conduit",i+1,"= " + prett_print_inches(calc[i][3]))
-
-def print_conduit_names(emt_list):
-    pass
 
 def prett_print_inches(inches):
 
@@ -158,30 +33,71 @@ def prett_print_inches(inches):
         return str(int(s[0]) + 1)
 
     return s[0] + frac
-    
-    
+
+# print the marks for conduits
+def converge(dist_list, first_os, c, angle, first_mark):
+
+	# get trig values
+	tantheta = tan(radians(angle))
+	sintheta = sin(radians(angle))
+	
+	
+	# get offset size
+	os_sizes = []
+	for i in range(len(dist_list)):
+		os_sizes.append(float(first_os + (i * c) - (dist_list[i] - dist_list[0]) ))
+
+	# get distance b/w marks
+	marks_dist = []	
+	for i in os_sizes:
+		marks_dist.append(i * (1/sintheta))
+
+	# get f values for each item in dist_list and store in a list
+	# f is defined as dist/tan(angle) - c/sin(angle), 
+	# where dist =  dist_list[i] - dist_list[i-1]
+	f_vals = [first_mark]
+	for i in range(1, len(dist_list)):
+		d = dist_list[i] - dist_list[i-1]
+		f = (d / tantheta) - (c / sintheta)
+		f_vals.append(f+f_vals[i-1])
+
+	adjusted_starting_value = first_mark - min(f_vals)
+	for i in range(len(f_vals)):
+		f_vals[i] = f_vals[i] + adjusted_starting_value
+		
+	# print nicely
+	for i in range(len(dist_list)):
+		print("Conduit number",str(i+1) + ":\n")
+		print("Mark 1: " + prett_print_inches(f_vals[i]))
+		print("Mark 2: " + prett_print_inches(f_vals[i] + marks_dist[i]))	
+		print("Offset size: " + prett_print_inches(os_sizes[i]))
+		print("Distance between marks: " + prett_print_inches(marks_dist[i]) + "\n")
+
 def main():
-    normalize()
-    
+	# get values from argparse
+	parser = argparse.ArgumentParser()
+	
+	
+	parser.add_argument("-d", "--distances", nargs="+", required=True,
+						help="<Required> list of the distances from the first conduit, starting with 0, in inches", type=float)
+
+	parser.add_argument("-o", "--offset", required=True,
+						help="<Required> distance of the first offset in inches", type=float)
+
+	parser.add_argument("-a", "--angle", default=45.0,
+						help="angle of the bend in degrees (default = 45)", type=float)
+
+	parser.add_argument("-n", "--normalized", default=2.0,
+						help="normalized centre-to-centre distance between conduits in inches (default = 2)", type=float)
+
+	parser.add_argument("-f", "--first_mark", default=6.0,
+						help="position of the smallest first mark in inches (default = 6.0)", type=float)
+
+	#parser.add_argument("-q", "--quiet", 
+						#help="set this flag to print with less info", action="store_true")
+
+	args = parser.parse_args()
+
+	converge(args.distances, args.offset, args.normalized, args.angle, args.first_mark)
+
 main()
-
-
-
-"""
-screen = curses.initscr()
-screen.addstr(0, 0, "my string")
-screen.addstr(3, 10, "my other string")
-screen.refresh()
-
-curses.napms(1500)
-my_window = curses.newwin(15, 20, 0, 0)
-my_window.addstr(3, 3, "hello from window")
-my_window.addstr(5, 5, "another round")
-my_window.refresh()
-
-screen.clear()
-screen.refresh()
-
-curses.endwin()
-"""
-
