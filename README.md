@@ -1,5 +1,7 @@
 # etrix
 
+This python script is a helper for bending concentric offsets of electrical conduit, and normalizing their spacing width. This app guarantees the spacing width of the conduits at the first bend, not just at the final bend. etrix is run entirely from the command line using arguments. This currently only supports the usecase where the largest offset is known. I call this the "converge" usecase. 
+
 ### Usage:
 
 run `./etrix --help` for help
@@ -13,3 +15,9 @@ from a terminal run `git clone https://github.com/fowlersteven/etrix/`
 `cd etrix`
 
 `chmod +x etrix`
+
+### TODO: 
+
+Add flag for quiet output (ie. less descriptive text, condense the numeric values).
+
+Add a diverge option for offsets where the smallest offset is the only known value. 
