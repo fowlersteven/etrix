@@ -19,7 +19,11 @@ from a terminal run `git clone https://github.com/fowlersteven/etrix/`
 ### TODO: 
 
 - [x] Add flag for quiet output (ie. less descriptive text, condense the numeric values).
-
 - [x] Add a diverge option for offsets where the smallest offset is the only known value. 
-
 - [ ] write a more thorough readme. 
+- [ ] Concentric rolled offsets
+- [ ] Concentric 90s generator
+- [ ] Concentric kick 90s
+- [ ] change plane of offsets (rack to wall)
+- [ ] change plane with kick 90s (rack to wall)
+- [ ] concentric segmented 90s generator
