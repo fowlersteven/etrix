@@ -34,7 +34,7 @@ def prett_print_inches(inches):
     return s[0] + frac
 
 # print the marks for conduits
-def converge(dist_list, first_os, c, angle, first_mark):
+def gen_concentric_offsets(dist_list, first_os, c, angle, first_mark, diverge):
 
 	# get trig values
 	tantheta = tan(radians(angle))
@@ -44,7 +44,10 @@ def converge(dist_list, first_os, c, angle, first_mark):
 	# get offset size
 	os_sizes = []
 	for i in range(len(dist_list)):
-		os_sizes.append(float(first_os + (i * c) - (dist_list[i] - dist_list[0]) ))
+	    if diverge:
+	        os_sizes.append(float(first_os - (i * c) + (dist_list[i] - dist_list[0])))
+	    else:
+		    os_sizes.append(float(first_os + (i * c) - (dist_list[i] - dist_list[0])))
 
 	# get distance b/w marks
 	marks_dist = []	
@@ -52,26 +55,50 @@ def converge(dist_list, first_os, c, angle, first_mark):
 		marks_dist.append(i * (1/sintheta))
 
 	# get f values for each item in dist_list and store in a list
-	# f is defined as dist/tan(angle) - c/sin(angle), 
+	# f is defined as dist/tan(angle) - c/sin(angle) for converging offsets, 
+	# and c/sin(angle) - dist/tan(angle) for diverging
 	# where dist =  dist_list[i] - dist_list[i-1]
 	f_vals = [first_mark]
 	for i in range(1, len(dist_list)):
 		d = dist_list[i] - dist_list[i-1]
-		f = (d / tantheta) - (c / sintheta)
+
+		if diverge:
+		    f = (c/sintheta) - (d/tantheta)
+		else:
+		    f = (d / tantheta) - (c / sintheta)
+
 		f_vals.append(f+f_vals[i-1])
 
 	adjusted_starting_value = first_mark - min(f_vals)
 	for i in range(len(f_vals)):
 		f_vals[i] = f_vals[i] + adjusted_starting_value
 		
-	# print nicely
+    # return this as a reasonable list of values and have a printing method handle it
+	marks_list = []
 	for i in range(len(dist_list)):
-		print("Conduit number",str(i+1) + ":\n")
-		print("Mark 1: " + prett_print_inches(f_vals[i]))
-		print("Mark 2: " + prett_print_inches(f_vals[i] + marks_dist[i]))	
-		print("Offset size: " + prett_print_inches(os_sizes[i]))
-		print("Distance between marks: " + prett_print_inches(marks_dist[i]) + "\n")
+	    local_list = []
+	    local_list.append(prett_print_inches(f_vals[i]))
+	    local_list.append(prett_print_inches(f_vals[i] + marks_dist[i]))
+	    local_list.append(prett_print_inches(os_sizes[i]))
+	    local_list.append(prett_print_inches(marks_dist[i]))
+	    marks_list.append(local_list)
 
+	return marks_list
+
+
+def result_print(marks_list, quiet = False):
+    if quiet:
+        for i in marks_list:
+            print(i[0])
+            print(i[1])
+            print('')
+    else:
+        for i in marks_list:
+            print("First mark:",i[0])
+            print("Second mark:",i[1])
+            print("Offset size:",i[2])
+            print("Distance between marks:",i[3],'\n')
+            
 def main():
 	# get values from argparse
 	parser = argparse.ArgumentParser()
@@ -81,7 +108,7 @@ def main():
 						help="<Required> list of the distances from the first conduit, starting with 0, in inches", type=float)
 
 	parser.add_argument("-o", "--offset", required=True,
-						help="<Required> size of the first offset in inches", type=float)
+						help="<Required> distance of the first offset in inches", type=float)
 
 	parser.add_argument("-a", "--angle", default=45.0,
 						help="angle of the bend in degrees (default = 45)", type=float)
@@ -92,11 +119,15 @@ def main():
 	parser.add_argument("-f", "--first_mark", default=6.0,
 						help="position of the smallest first mark in inches (default = 6.0)", type=float)
 
-	#parser.add_argument("-q", "--quiet", 
-						#help="set this flag to print with less info", action="store_true")
+	parser.add_argument("-q", "--quiet", 
+						help="set this flag to print with less info", action="store_true")
+
+	parser.add_argument("-D", "--diverge", 
+							help="use when only smallest offset is known", action="store_true")
 
 	args = parser.parse_args()
 
-	converge(args.distances, args.offset, args.normalized, args.angle, args.first_mark)
+	result_print(gen_concentric_offsets(args.distances, args.offset, args.normalized, 
+	            args.angle, args.first_mark, args.diverge), args.quiet)
 
 main()
