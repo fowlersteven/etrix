@@ -18,6 +18,8 @@ from a terminal run `git clone https://github.com/fowlersteven/etrix/`
 
 ### TODO: 
 
-Add flag for quiet output (ie. less descriptive text, condense the numeric values).
+- [x] Add flag for quiet output (ie. less descriptive text, condense the numeric values).
 
-Add a diverge option for offsets where the smallest offset is the only known value. 
+- [x] Add a diverge option for offsets where the smallest offset is the only known value. 
+
+- [ ] write a more thorough readme. 
