@@ -1,6 +1,6 @@
 # etrix
 
-This python script is a helper for bending concentric offsets of electrical conduit, and normalizing their spacing width. This app guarantees the spacing width of the conduits at the first bend, not just at the final bend. etrix is run entirely from the command line using arguments. This currently only supports the usecase where the largest offset is known. I call this the "converge" usecase. 
+This python script is a helper for bending concentric offsets of electrical conduit, and normalizing their spacing width. This app guarantees the spacing width of the conduits at the first bend, not just at the final bend. etrix is run entirely from the command line using arguments. ~~This currently only supports the usecase where the largest offset is known~~. Support for diverging and converging offsets added. 
 
 ### Usage:
 
